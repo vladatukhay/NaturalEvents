@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">My Events</string>
+
+    <string name="hello_info_fragment">Hello Info fragment</string>
+    <string name="title_home">Home</string>
+    <string name="title_info">Info</string>
+    <string name="hello_blank_fragment1">Hello blank fragment1</string>
+    <string name="hello_blank_fragment2">Hello blank fragment2</string>
+    <string name="title_activity_event">EventActivity</string>
+    <!--
+    This string is used for square devices and overridden by hello_world in
+    values-round/strings.xml for round devices.
+    -->
+    <string name="hello_world">Hello Square World!</string>
+</resources>
