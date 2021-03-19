@@ -9,6 +9,14 @@
         android:id="@+id/eventsFragment"
         android:name="com.example.myevents.fragments.EventsFragment"
         android:label="fragment_events"
-        tools:layout="@layout/fragment_events"></fragment>
+        tools:layout="@layout/fragment_events">
+        <action
+            android:id="@+id/action_eventsFragment_to_eventActivity"
+            app:destination="@id/eventActivity" />
+    </fragment>
+    <activity
+        android:id="@+id/eventActivity"
+        android:name="com.example.myevents.activity.EventActivity"
+        android:label="EventActivity" />
 
 </navigation>

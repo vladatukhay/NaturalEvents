@@ -9,16 +9,18 @@ object Retrofit {
 
     val baseUrl = "https://eonet.sci.gsfc.nasa.gov/api/v3/"
 
-    val apiService : APIService by lazy {
+    val retrofitClient : Retrofit.Builder by lazy {
         Log.d("Retrofit", "Creating retrofit client")
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .addConverterFactory(MoshiConverterFactory.create())
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
-            .build()
+        Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(MoshiConverterFactory.create())
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
+    }
 
-        // Create Retrofit client
-        return@lazy retrofit.create(APIService::class.java)
+    val apiService: APIService by lazy {
+        retrofitClient
+                .build()
+                .create(APIService::class.java)
     }
 }

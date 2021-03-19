@@ -5,9 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import android.net.Uri
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,24 +13,23 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myevents.*
 import com.example.myevents.R
 import com.example.myevents.activity.EventActivity
-import com.example.myevents.data.EventNetworkModel
 import com.example.myevents.data.Events
 import com.example.myevents.databinding.FragmentEventsBinding
-import com.example.myevents.retrofit.Retrofit
+import com.example.myevents.viewmodels.EventViewModel
 import com.google.android.gms.location.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+
 
 class EventsFragment : Fragment(), EventClickListener {
+
+    private val viewModel: EventViewModel by lazy {
+        ViewModelProvider(this).get(EventViewModel::class.java)
+    }
 
     private lateinit var binding: FragmentEventsBinding
 
@@ -48,46 +45,27 @@ class EventsFragment : Fragment(), EventClickListener {
 
 
         binding.refreshLayout.setOnRefreshListener {
-            getEonetEvents()
+            setupRecyclerView()
         }
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
-        getEonetEvents()
-
+        setupRecyclerView()
 //        requestPermission()
 //        getLastLocation()
 
         return binding.root
     }
 
-    private fun getEonetEvents() {
+    private fun setupRecyclerView() {
+        binding.refreshLayout.isRefreshing = true
 
-        //CoroutineScope(Dispatchers.IO).launch {
-            binding.refreshLayout.isRefreshing = true
-
-            Retrofit.apiService.getEvents().enqueue(object : Callback<EventNetworkModel> {
-                override fun onResponse(
-                    call: Call<EventNetworkModel>,
-                    response: Response<EventNetworkModel>
-                ) {
-                    binding.refreshLayout.isRefreshing = false
-
-                    if (response.code() == 200) {
-                        val eventResponse: EventNetworkModel = response.body()!!
-                        adapter = EventAdapter(eventResponse.events, this@EventsFragment)
-                        binding.recyclerView.adapter = adapter
-                        binding.recyclerView.layoutManager = LinearLayoutManager(context)
-                    }
-                }
-
-                override fun onFailure(call: Call<EventNetworkModel>, t: Throwable) {
-                    binding.refreshLayout.isRefreshing = false
-
-                    Log.v("MainActivity", "fail")
-                }
-            })
-     //   }
+        viewModel.getEonetEvents()!!.observe(viewLifecycleOwner, Observer { listOfEvents ->
+            adapter = EventAdapter(listOfEvents.events, this@EventsFragment)
+            binding.recyclerView.adapter = adapter
+            binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        })
+        binding.refreshLayout.isRefreshing = false
     }
 
 
@@ -159,8 +137,6 @@ class EventsFragment : Fragment(), EventClickListener {
     override fun onItemClick(event: Events) {
         Toast.makeText(context, "Event ${event.title}", Toast.LENGTH_LONG).show()
 
-
-
         val showEventIntent = Intent(context, EventActivity::class.java)
         showEventIntent.putExtra("event_title", event.title)
         context?.startActivity(showEventIntent)
@@ -171,6 +147,5 @@ class EventsFragment : Fragment(), EventClickListener {
         val TAG: String = EventsFragment::class.java.simpleName
         fun newInstance() = EventsFragment()
     }
-
 
 }
